@@ -89,7 +89,7 @@ public class SqliteKitResult: Sequence, CustomStringConvertible {
 						break
 					case SQLITE_TEXT:
 						let textbuffer: UnsafePointer<UInt8> = sqlite3_column_text(statement, index)
-						let text = String(utf8String: unsafeBitCast(textbuffer, to: UnsafePointer<Int8>.self))
+						let text = String(utf8String: UnsafePointer<CChar>(OpaquePointer(textbuffer)!))
 						dictionary[name] = text
 						break
 					case SQLITE_BLOB:
