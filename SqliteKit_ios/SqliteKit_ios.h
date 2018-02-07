@@ -2,7 +2,7 @@
 //  SqliteKit_ios.h
 //  SqliteKit_ios
 //
-//  Copyright (c) 2016 Electricwoods LLC, Kaz Yoshikawa.
+//  Copyright (c) 2018 Electricwoods LLC, Kaz Yoshikawa.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy 
 //  of this software and associated documentation files (the "Software"), to deal 
