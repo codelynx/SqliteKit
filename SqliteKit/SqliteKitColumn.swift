@@ -40,10 +40,10 @@ public class SqliteKitColumn {
 
 	public init(table: SqliteKitTable, attributes: [String: Any]) {
 		self.table = table
-		self.cid = (attributes["cid"] as AnyObject).intValue
+		self.cid = attributes["cid"] as? Int
 		self.name = attributes["name"] as? String
 		self.type = attributes["type"] as? String
-		self.notnull = (attributes["notnull"] as AnyObject).intValue
-		self.pk = (attributes["pk"] as AnyObject).intValue
+		self.notnull = attributes["notnull"] as? Int
+		self.pk = attributes["pk"] as? Int
 	}
 }

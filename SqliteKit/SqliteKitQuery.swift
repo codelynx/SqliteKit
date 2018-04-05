@@ -40,7 +40,7 @@ public class SqliteKitQuery: CustomStringConvertible {
 		_query = query
 		var tail : UnsafePointer<Int8>? = nil
 		let status = sqlite3_prepare_v2(database.sqlite, query, -1, &_stmt, &tail)
-		SqliteKitReportIfError(status)
+		SqliteKitReportError(status)
 	}
 
 	deinit {
@@ -51,6 +51,10 @@ public class SqliteKitQuery: CustomStringConvertible {
 	}
 	
 	public func bind(_ args: AnyObject...) {
+		self.bind(args.map { $0 })
+	}
+
+	public func bind(_ args: [AnyObject]) {
 
 		sqlite3_reset(_stmt);
 		sqlite3_clear_bindings(_stmt);
@@ -74,7 +78,7 @@ public class SqliteKitQuery: CustomStringConvertible {
 			index += 1
 		}
 	}
-	
+
 	public var database : SqliteKitDatabase {
 		return _database
 	}

@@ -28,6 +28,8 @@
 import Foundation
 import sqlite
 
+public typealias SqliteKitRow = [String: Any]
+
 
 public class SqliteKitResult: Sequence, CustomStringConvertible {
 
@@ -38,7 +40,7 @@ public class SqliteKitResult: Sequence, CustomStringConvertible {
 	public init (query: SqliteKitQuery) {
 		self.query = query
 		self.status = sqlite3_step(query.statement)
-		SqliteKitReportIfError(status, query)
+		SqliteKitReportError(status, query)
 	}
 
 	var statement : OpaquePointer {
@@ -54,24 +56,27 @@ public class SqliteKitResult: Sequence, CustomStringConvertible {
 		return sqlite3_last_insert_rowid(query.database.sqlite)
 	}
 
-	public var columns : [String] {
-		if _columns == nil {
-			let statement = self.statement
-			var columns = [String]()
-			let numberOfColumns = sqlite3_column_count(statement)
-			for index in 0...numberOfColumns {
-				let buffer = sqlite3_column_name(statement, Int32(index))
-				let text = String(utf8String: unsafeBitCast(buffer, to: UnsafePointer<Int8>.self)) ?? ""
-				columns.append(text)
-			}
-			_columns = columns
+	public func fetchColumns() -> [String] {
+		let statement = self.statement
+		var columns = [String]()
+		let numberOfColumns = sqlite3_column_count(statement)
+		for index in 0...numberOfColumns {
+			let buffer = sqlite3_column_name(statement, Int32(index))
+			let text = String(utf8String: unsafeBitCast(buffer, to: UnsafePointer<Int8>.self)) ?? ""
+			columns.append(text)
 		}
 		return _columns!
 	}
 
-	public func nextRow() -> [String: Any]? {
+	public var columns : [String] {
+		let columns = _columns ?? fetchColumns()
+		_columns = columns
+		return columns
+	}
+
+	public func nextRow() -> SqliteKitRow? {
 		if self.status == SQLITE_ROW {
-			var dictionary = [String: Any]()
+			var dictionary = SqliteKitRow()
 			let statement = self.statement
 			let numberOfColumns = sqlite3_column_count(statement)
 			for index in 0 ..< numberOfColumns {
@@ -112,12 +117,21 @@ public class SqliteKitResult: Sequence, CustomStringConvertible {
 		return nil
 	}
 
-	public func makeIterator() -> AnyIterator<[String: Any]> {
+	public func makeIterator() -> AnyIterator<SqliteKitRow> {
 		return AnyIterator {
 			return self.nextRow()
 		}
 	}
 	
+	public var isAtEnd: Bool {
+		if self.status == SQLITE_ROW { return false }
+		else { return true }
+	}
+	
+	public var database: SqliteKitDatabase {
+		return query.database
+	}
+
 	public var description: String {
 		let description = self.query.description
 		NSLog(description)

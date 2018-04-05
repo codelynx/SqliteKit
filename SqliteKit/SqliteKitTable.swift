@@ -33,13 +33,15 @@ public class SqliteKitTable {
 
 	public var name: String
 	public var database: SqliteKitDatabase
-
+	
 	public init(name: String, database: SqliteKitDatabase) {
 		self.name = name
 		self.database = database
 	}
 
-	lazy var columns: [SqliteKitColumn]! = {
+	private var _columns: [SqliteKitColumn]?
+	
+	private func fetchColumns() -> [SqliteKitColumn] {
 		var columns = [SqliteKitColumn]()
 		let query = self.database.query("pragma table_info('\(self.name)');")
 		for row in query.execute() {
@@ -47,6 +49,12 @@ public class SqliteKitTable {
 			columns.append(column)
 		}
 		return columns
-	}()
+	}
+
+	public var columns: [SqliteKitColumn] {
+		let columns = _columns ?? fetchColumns()
+		_columns = columns
+		return columns
+	}
 
 }

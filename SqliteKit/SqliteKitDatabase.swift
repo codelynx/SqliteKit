@@ -29,7 +29,7 @@ import Foundation
 import sqlite
 
 
-enum ZSqliteError: Error, CustomStringConvertible {
+enum SqliteKitError: Error, CustomStringConvertible {
 
 	case status(Int32)
 	
@@ -77,11 +77,11 @@ enum ZSqliteError: Error, CustomStringConvertible {
 }
 
 
-func SqliteKitReportIfError(_ status: Int32, _ query: SqliteKitQuery? = nil) {
+func SqliteKitReportError(_ status: Int32, _ query: SqliteKitQuery? = nil) {
 	switch status {
 	case SQLITE_OK, SQLITE_ROW, SQLITE_DONE: break
     default:
-		NSLog("sqlite3: \(ZSqliteError.status(status).description)")
+		NSLog("sqlite3: \(SqliteKitError.status(status).description)")
 		NSLog("\(query.debugDescription)")
 	}
 }
@@ -133,23 +133,28 @@ public class SqliteKitDatabase {
 		return tables
 	}
 
-	public func tableNamed(_ name: String) -> SqliteKitTable {
-		var table = self.dictionary[name]
-		if table == nil {
-			if self.tableNames().contains(name) {
-				table = SqliteKitTable(name: name, database: self)
-				self.dictionary[name] = table
-			}
+	public func table(named name: String) -> SqliteKitTable? {
+		if self.tableNames().contains(name) {
+			return SqliteKitTable(name: name, database: self)
 		}
-		return table!
+		return nil
 	}
+
+	private var _tables: [SqliteKitTable]?
 	
-	func tables() -> [SqliteKitTable] {
+	public var tables: [SqliteKitTable] {
+		let tables = _tables ?? fetchTables()
+		_tables = tables
+		return tables
+	}
+
+	public func fetchTables() -> [SqliteKitTable] {
 		var tables = [SqliteKitTable]()
 		for object in self.tableNames() {
 			let name = object as String
-			let table = self.tableNamed(name)
-			tables.append(table)
+			if let table = self.table(named: name) {
+				tables.append(table)
+			}
 		}
 		return tables
 	}
@@ -165,8 +170,10 @@ public class SqliteKitDatabase {
 		set {
 			let state = newValue ? "ON" : "OFF"
 			let result = self.query("PRAGMA foreign_keys = \(state);").execute()
-			SqliteKitReportIfError(result.status)
+			SqliteKitReportError(result.status)
 		}
 	}
+
+	// MARK: -
 
 }
