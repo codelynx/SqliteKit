@@ -1,8 +1,8 @@
 //
-//  SqliteKit_ios_Tests.swift
-//  SqliteKit_ios_Tests
+//	SqliteKit_ios_Tests.swift
+//	SqliteKit_ios_Tests
 //
-//  Created by Kaz Yoshikawa on 9/19/16.
+//	Created by Kaz Yoshikawa on 9/19/16.
 //
 //
 
@@ -26,27 +26,27 @@ class SqliteKit_ios_Tests: XCTestCase {
 		guard let database = SqliteKitDatabase(file: filepath, readonly: false) else { fatalError("failed creating SqliteKitDatabase") }
 		return database
 	}
-
+	
 	lazy var database1: SqliteKitDatabase = { return SqliteKit_ios_Tests.database(name: "test1") }()
 	lazy var database2: SqliteKitDatabase = { return SqliteKit_ios_Tests.database(name: "test2") }()
-
 	
-
-
-    override func setUp() {
-        super.setUp()
+	
+	
+	
+	override func setUp() {
+		super.setUp()
 		let directory = NSTemporaryDirectory()
 		for item in try! FileManager.default.contentsOfDirectory(atPath: directory) {
 			let fiepath = (directory as NSString).appendingPathComponent(item)
 			try! FileManager.default.removeItem(atPath: fiepath)
 		}
-    }
-    
-    override func tearDown() {
-        super.tearDown()
-    }
-    
-    func testExample() {
+	}
+	
+	override func tearDown() {
+		super.tearDown()
+	}
+	
+	func testExample() {
 		let db = self.database1
 		let _ = db.executeQuery("CREATE TABLE IF NOT EXISTS product (pid INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, price DOUBLE);")
 		let _ = db.executeQuery("INSERT INTO product('name', 'price') VALUES('Apple', '100');")
@@ -57,7 +57,7 @@ class SqliteKit_ios_Tests: XCTestCase {
 			XCTAssert(name == "Apple")
 			XCTAssert(price == 100.0)
 		}
-    }
+	}
 	
 	func testLastInsertRowID() {
 		let db = self.database2
@@ -75,9 +75,9 @@ class SqliteKit_ios_Tests: XCTestCase {
 	}
 	
 	
-    func testPerformanceExample() {
-        self.measure {
-        }
-    }
-    
+	func testPerformanceExample() {
+		self.measure {
+		}
+	}
+	
 }
